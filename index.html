@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GENE HIVE — Bioforge Edition</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="gameRoot">
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+    <div class="hudDock topLeftDock">
+      <div class="statChip hpChip"><span class="label">Жизнь</span><span class="value" id="hpText">100 / 100</span></div>
+      <div class="statChip dnaChip"><span class="label">ДНК за забег</span><span class="value" id="geneText">0</span></div>
+      <div class="statChip reserveChip"><span class="label">Резерв ДНК</span><span class="value" id="bankText">0</span></div>
+      <div class="statChip waveChip"><span class="label">Волна</span><span class="value" id="waveText">1</span></div>
+      <div class="statChip enemyChip"><span class="label">Цели</span><span class="value" id="enemyText">0</span></div>
+      <div class="statChip levelChip"><span class="label">Эволюция</span><span class="value" id="lvlText">1</span></div>
+    </div>
+
+    <div class="hudDock topRightDock">
+      <button id="shopBtn" class="hudAction">Генолаб арсенала</button>
+    </div>
+
+    <div class="microPanel controlsPanel">
+      <span>WASD — ход</span>
+      <span>Shift — рывок</span>
+      <span>Space — всплеск</span>
+    </div>
+
+            <div id="startScreen" class="overlay show gameMenuOverlay">
+      <div class="panel splashArtPanel">
+        <div class="menuReadouts menuReadoutsHidden" aria-hidden="true">
+          <div class="menuReadout readoutWave"><span>Лучший забег</span><strong id="bestWaveText">Волна 1</strong></div>
+          <div class="menuReadout readoutBank"><span>Резерв ДНК</span><strong id="menuBankText">0</strong></div>
+        </div>
+
+        <img class="menuArtImage" src="assets/menu_splash_v24.png" alt="GENE HIVE splash screen" />
+
+        <button id="playBtn" class="hotspotBtn playHotspot" aria-label="Начать забег"></button>
+        <button id="playBtnBottom" class="hotspotBtn playBottomHotspot" aria-label="Начать забег"></button>
+        <button id="shopMenuBtn" class="hotspotBtn labHotspot" aria-label="Открыть Генолаб"></button>
+        <button id="settingsBtn" class="hotspotBtn settingsHotspot" aria-label="Открыть выбор биома"></button>
+        <button id="resetBestBtn" class="hotspotBtn resetHotspot" aria-label="Сбросить прогресс"></button>
+        <button id="biomeToggleBtn" class="hotspotBtn biomeBadgeHotspot" aria-label="Выбор биома"></button>
+
+        <div id="selectedBiomeBadge" class="selectedBiomeBadge hiddenMenuLabel">Биом: Руины улья</div>
+
+        <div id="biomePanel" class="biomeOverlayPanel hiddenPanel">
+          <div class="biomePanelHeader">
+            <div>
+              <div class="arsenalTitle">Выбор биома</div>
+              <div class="biomePanelSub">Открой следующий биом, пройдя предыдущий.</div>
+            </div>
+            <button id="closeBiomePanelBtn" class="panelCloseBtn" aria-label="Закрыть">×</button>
+          </div>
+          <div id="biomeCards" class="biomeGrid biomeGridMenu"></div>
+          <div class="biomePanelFooter">Один забег = один биом. После зачистки 20-й волны ты можешь перейти дальше или вернуться в главное меню.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="levelUpScreen" class="overlay hidden">
+      <div class="panel levelPanel">
+        <div class="sectionEyebrow">Эволюционный выбор</div>
+        <h2>Мутация готова</h2>
+        <p id="levelUpText">Выбери усиление и продолжай прорыв через рой.</p>
+        <div id="levelCards" class="cards"></div>
+      </div>
+    </div>
+
+    <div id="fusionScreen" class="overlay hidden">
+      <div class="panel levelPanel">
+        <div class="sectionEyebrow">Синтез босса</div>
+        <h2>Новая ветка эволюции</h2>
+        <p id="fusionText">Слей две уже освоенные мутации и открой более сильную форму.</p>
+        <div id="fusionCards" class="cards"></div>
+      </div>
+    </div>
+
+    <div id="shopScreen" class="overlay hidden">
+      <div class="panel shopPanel">
+        <div class="shopHeader">
+          <div>
+            <div class="sectionEyebrow">Генолаб арсенала</div>
+            <h2>Архив генома</h2>
+            <p class="shopLead">Вкладывай ДНК в глубинные органы улья. Улучшения сохраняются и меняют старт каждого нового забега.</p>
+          </div>
+          <div class="shopWallet">
+            <span>Резерв ДНК</span>
+            <strong id="shopBankText">0</strong>
+          </div>
+        </div>
+        <div id="shopCards" class="cards shopCards"></div>
+        <div class="startActions shopActions">
+          <button id="shopCloseBtn" class="primary">Закрыть Генолаб арсенала</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameOverScreen" class="overlay hidden">
+      <div class="panel smallPanel">
+        <div class="sectionEyebrow">Забег завершён</div>
+        <h2>Рой удержал арену</h2>
+        <p id="gameOverText"></p>
+        <div class="resultStrip">
+          <div class="heroMetric compact"><span>Резерв ДНК</span><strong id="gameOverBankText">0</strong></div>
+        </div>
+        <div class="startActions">
+          <button id="restartBtn" class="primary">Повторить биом</button>
+          <button id="nextBiomeBtn" class="primary hiddenAction">Следующий биом</button>
+          <button id="backMenuBtn" class="secondary">В меню</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="pauseScreen" class="overlay hidden pauseOverlay">
+      <div class="panel pausePanel">
+        <div class="pauseTitle">ПАУЗА</div>
+        <div class="pauseSubtitle">Забег остановлен. Можно продолжить или выйти в главное меню. Клавиша M включает/выключает музыку.</div>
+        <div class="pauseActions">
+          <button id="resumeBtn" class="primary large">Продолжить</button>
+          <button id="pauseMenuBtn" class="secondary large">В главное меню</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
